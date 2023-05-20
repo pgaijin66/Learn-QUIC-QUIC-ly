@@ -1,5 +1,7 @@
 # Learn-QUIC-QUIC-ly
 
+## About QUIC
+
 QUIC, or Quick UDP Internet Connections, is a protocol that offers several key features and advantages over TCP and UDP. It is important to remember the following aspects of QUIC:
 
 Multi-Channel Streams: QUIC supports multiple channels or streams for bidirectional communication, similar to lanes on a freeway. Each stream can send data in both directions simultaneously, allowing efficient communication.
@@ -31,3 +33,19 @@ QUIC connections have unique IDs at each endpoint, and clients typically use UDP
 QUIC supports bi-directional or unidirectional streams, similar to lanes on a freeway. Each stream acts as a separate communication channel and can transmit data in both directions. QUIC can handle multiple streams efficiently. While QUIC does support multiple streams for bidirectional communication. **Note: Be-careful when talking about lanes. Streams in QUIC are independent data channels within a single QUIC connection and do not have any inherent ordering or prioritization like lanes on a freeway.**
 
 In QUIC, packets are encapsulated within UDP. The packet structure consists of Ethernet header, IP header, UDP header, and QUIC-specific headers such as CRYPTO frames, ACK frames, and STREAM frames.
+
+## QUIC Discovery
+
+### First Connection
+
+When a request is made to an unfamiliar origin, the client (such as Chrome) doesn't know if the origin supports QUIC (Quick UDP Internet Connections), so it initially sends the request over TCP (Transmission Control Protocol). The server's response includes an Alt-Svc HTTP header, which indicates that the origin also supports QUIC (e.g., 'Alt-Svc: h3=":443"'). This informs Chrome that the origin can communicate using QUIC on port 443. With this knowledge, Chrome can attempt to use QUIC for subsequent requests.
+
+For the next request, Chrome competes a QUIC connection attempt with a TCP connection attempt. These connection attempts are independent of the request itself and serve to establish a connection. Since the first request was sent over TCP, the TCP connection attempt usually wins the race, and the second request is sent over TCP. At some point later, the QUIC connection attempt may succeed. Once that happens, all future requests to the origin are sent over the established QUIC connection.
+
+### Subsequent Connections
+
+Chrome retains the information that an origin supports QUIC, along with the server configuration that enables QUIC's 0-RTT (Zero Round Trip Time) handshake. When Chrome makes a request to an origin it has previously communicated with over QUIC, it competes a TCP connection attempt with a QUIC connection attempt. Since Chrome can perform a 0-RTT handshake using the retained information, the QUIC connection attempt usually wins the race, and the request is issued over the existing QUIC connection.
+
+### Broken Connections
+
+If a QUIC handshake fails, such as when UDP is blocked or the server doesn't support a compatible QUIC version, Chrome marks QUIC as "broken" for that specific host. Any ongoing requests are reissued over TCP. While QUIC is marked as broken for a host, Chrome refrains from attempting any QUIC connections. After a period of 5 minutes, the broken status expires, and QUIC is marked as "recently broken" for that origin. When the next request is sent to that origin, Chrome again competes a QUIC connection attempt with a TCP connection attempt. Since QUIC was recently broken, the 0-RTT handshake is disabled. If the handshake fails again, QUIC is marked as broken for the origin, this time for 10 minutes, and the process continues, doubling the duration of the broken status each time. If the handshake succeeds, the request is sent over QUIC, and QUIC is no longer marked as "recently broken."
