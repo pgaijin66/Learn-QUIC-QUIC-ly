@@ -16,7 +16,7 @@ QUIC does not replace UDP; rather, it uses UDP as its underlying transport proto
 
 QUIC employs port 443, similar to Transport Layer Security (TLS), to facilitate communication. Essentially, QUIC combines elements of TLS, UDP, handshake mechanisms, and 0 RTT to create an efficient and secure protocol.
 
-In terms of its development, QUIC was initially developed by google as gQUICC. Google contributed the protocol to the IETF for standardization, and the IETF formed the QUIC Working Group to develop the protocol further.
+In terms of its development, QUIC was initially developed by google as gQUIC. Google contributed the protocol to the IETF for standardization, and the IETF formed the QUIC Working Group to develop the protocol further.
 
 QUIC offers several advantages over TCP, including reduced RTT, embedded TLS handshake within one round trip, and zero RTT performance. Additionally, the QUIC protocol encrypts the header itself, enhancing security compared to TCP, where the header remains unencrypted. **Note: QUIC does encrypt the payload of the packet, but the header of the QUIC packet is not entirely encrypted. QUIC includes a partially encrypted header, which provides essential information for routing and processing the packet.**
 
